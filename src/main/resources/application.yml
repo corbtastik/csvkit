@@ -1,0 +1,24 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create
+  flyway:
+    locations: classpath:/db/migration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: auditevents,beans,conditions,configprops,env,flyway,health,heapdump,httptrace,info,jolokia,logfile,loggers,metrics,mappings,scheduledtasks,threaddump
+      base-path: /ops
+    enabled-by-default: true
+logging:
+  level:
+    io:
+      corbs:
+        playersdb: DEBUG

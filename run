@@ -1,0 +1,4 @@
+#!/bin/bash
+java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=9111,suspend=n \
+  -jar ./target/csvkit-0.0.1-SNAPSHOT.jar \
+  --server.port=8000 "$@"
