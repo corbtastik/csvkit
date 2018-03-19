@@ -2,14 +2,18 @@ spring:
   servlet:
     multipart:
       max-file-size: 10MB
-  h2:
-    console:
-      enabled: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/csv_lines
+    username: root
+#  h2:
+#    console:
+#      enabled: true
   jpa:
     hibernate:
       ddl-auto: create
   flyway:
     locations: classpath:/db/migration
+    baseline-on-migrate: true
 management:
   endpoints:
     web:
@@ -21,4 +25,4 @@ logging:
   level:
     io:
       corbs:
-        playersdb: DEBUG
+        csvkit: DEBUG
