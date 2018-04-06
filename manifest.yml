@@ -2,8 +2,9 @@
 applications:
 - name: csvkit
   memory: 1G
-  host: csvkit
-  path: target/csvkit-1.0.0.RELEASE.jar
+  routes:
+  - route: csvkit-v1_0_1.apps.pcf.corbscloud.io
+  path: target/csvkit-1.0.1.RELEASE.jar
   buildpack: java_buildpack
   services:
-  - dev-db-small
+  - csvdb-1.0.1
