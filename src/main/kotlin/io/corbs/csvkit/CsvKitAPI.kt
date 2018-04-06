@@ -40,4 +40,33 @@ class CsvKitAPI(@Autowired val csvService: CsvService) {
         return ResponseEntity("${csvService.removeLines(tag)} removed", HttpStatus.OK)
     }
 
+    // Metadata endpoints
+
+    @PostMapping("/csv/{tag}/meta")
+    fun saveMetadata(@PathVariable tag: String, @RequestBody body: String): String {
+        val reader = BufferedReader(StringReader(body))
+        val csvLines = reader.lines()
+                .filter{it -> "" != it.trim() }
+                .map {it -> CsvLine(it)}.collect(Collectors.toList())
+
+        for(line in csvLines){
+            val list = line.asList()
+            csvService.saveMetadata(CsvMetadata(tag = list[0], property = list[1], value = list[2]))
+        }
+
+        return "thank,you,for,${csvLines.size},metadata"
+    }
+
+    @GetMapping("/csv/{tag}/meta")
+    fun readMetadata(@PathVariable tag: String): List<CsvMetadata> {
+
+        return csvService.findMetadata(tag)
+    }
+
+    @DeleteMapping("/csv/{tag}/meta")
+    fun removeMetadata(@PathVariable tag: String): String {
+        return csvService.removeMetadata(tag).toString()
+    }
+
 }
+

@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class CsvService(@Autowired val repo: CsvLineRepository) {
+class CsvService(
+    @Autowired val lineRepo: CsvLineRepository,
+    @Autowired val metaRepo: CsvMetadataRepository) {
 
     companion object { val LOG = LoggerFactory.getLogger(CsvService::class.java.name) }
 
@@ -16,7 +18,7 @@ class CsvService(@Autowired val repo: CsvLineRepository) {
         for(csvLine in list) {
             adapters.add(CsvLineEntity(tag, csvLine.toString()))
         }
-        repo.saveAll(adapters)
+        lineRepo.saveAll(adapters)
     }
 
     fun saveOffline(tag: String, list: List<CsvLine>) {
@@ -25,7 +27,7 @@ class CsvService(@Autowired val repo: CsvLineRepository) {
 
     fun findLines(tag: String): List<CsvLine> {
         val lines = mutableListOf<CsvLine>()
-        repo.findByTagOrderById(tag).map {
+        lineRepo.findByTagOrderById(tag).map {
             it -> CsvLine(it.text)
         }.toCollection(lines)
 
@@ -33,9 +35,23 @@ class CsvService(@Autowired val repo: CsvLineRepository) {
     }
 
     fun removeLines(tag: String): Int {
-        val lines = repo.findByTagOrderById(tag)
-        repo.deleteAll(lines)
+        val lines = lineRepo.findByTagOrderById(tag)
+        lineRepo.deleteAll(lines)
         return lines.size
+    }
+
+    fun saveMetadata(metadata: CsvMetadata) {
+        metaRepo.save(metadata)
+    }
+
+    fun findMetadata(tag: String): List<CsvMetadata> {
+        return metaRepo.findByTagOrderById(tag)
+    }
+
+    fun removeMetadata(tag: String): Int {
+        val recs = metaRepo.findByTagOrderById(tag)
+        metaRepo.deleteAll(recs)
+        return recs.size
     }
 
 //    fun findAllLines(tag: String, callback: (List<CsvLine>) -> Unit) {
