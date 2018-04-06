@@ -3,5 +3,7 @@ applications:
 - name: csvkit
   memory: 1G
   host: csvkit
-  path: target/csvkit-0.0.1-SNAPSHOT.jar
-  buildpack: java_buildpack_offline
+  path: target/csvkit-1.0.0.RELEASE.jar
+  buildpack: java_buildpack
+  services:
+  - dev-db-small

@@ -2,65 +2,44 @@ package io.corbs.csvkit
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.io.BufferedOutputStream
-import javax.servlet.http.HttpServletRequest
+import java.io.BufferedReader
+import java.io.StringReader
+import java.util.stream.Collectors
 
 @RestController
-class CsvKitAPI(@Autowired val csvStore: CsvStore) {
+class CsvKitAPI(@Autowired val csvService: CsvService) {
 
-    companion object {
-        val LOG = LoggerFactory.getLogger(CsvKitAPI::class.java.name)
-    }
-
-    /**
-     * Note since we make 'size' optional we must also make the type Nullable
-     * since Spring will pass a null value for optional types
-     *
-     * Take a csv file (header is assumed) and save under the client provided 'tag'
-     * 'tag' must be a unique String. If such a 'tag' exists then an exception
-     * will be raised.  If not the csv file is saved under the given 'tag' and performing
-     * a GET on /csv/{tag} will stream out the csv data
-     */
-    @PostMapping("/csv/upload/{tag}")
-    fun csvFile(@RequestParam("file") csv: MultipartFile,
-                @PathVariable("tag") tag: String,
-                @RequestParam("size", required = false) size: Int?) : String {
-
-        if(csv.isEmpty) {
-            return "file,is,empty"
-        }
-
-        CsvIO(csv.inputStream).every(1000).go { csvStore.save(tag, it) }
-
-        return "howdy,yo,thank,you,for,tag,$tag,yummy,yum,yum"
-    }
+    companion object { val LOG = LoggerFactory.getLogger(CsvKitAPI::class.java.name) }
 
     @PostMapping("/csv/{tag}")
-    fun csvBody(@PathVariable("tag") tag: String, request: HttpServletRequest) : String {
-
-        if(request.inputStream == null) {
-            return "inputstream,is,null"
-        }
-
-        CsvIO(request.inputStream).every(1000).go { csvStore.save(tag, it) }
-
-        return "howdy,yo,thank,you,for,tag,$tag,yummy,yum,yum"
+    fun createCsv(@PathVariable("tag") tag: String, @RequestBody body: String): ResponseEntity<String> {
+        val reader = BufferedReader(StringReader(body))
+        val csvLines = reader.lines()
+            .filter{it -> "" != it.trim() }
+                .map {it -> CsvLine(it)}.collect(Collectors.toList())
+        csvService.saveLines(tag, csvLines)
+        val message = "thank,you,for,${csvLines.size},lines"
+        LOG.info(message)
+        return ResponseEntity(message, HttpStatus.CREATED)
     }
 
     @GetMapping("/csv/{tag}")
-    fun csvRead(@PathVariable("tag") tag: String, request: HttpServletRequest): StreamingResponseBody {
-        return StreamingResponseBody {output -> run {
-            val writer = BufferedOutputStream(output).bufferedWriter()
-            csvStore.findAll(tag, {
-                    for(line in it) {
-                        writer.write(line.line + System.lineSeparator())
-                    }
-                    writer.flush()
-                })
-            }
-        }
+    fun readCsv(@PathVariable("tag") tag: String): String {
+        val lines = csvService.findLines(tag).map { it -> it.line }
+        val body = lines.stream().collect(Collectors.joining(System.lineSeparator()))
+        LOG.info("returning,${lines.size},yummy,lines,under,tag,${tag}")
+        return body
     }
+
+    @DeleteMapping("/csv/{tag}")
+    fun removeCsv(@PathVariable("tag") tag: String): ResponseEntity<String> {
+        LOG.info("removing,tag,${tag}")
+        return ResponseEntity("${csvService.removeLines(tag)} removed", HttpStatus.OK)
+    }
+
 }
