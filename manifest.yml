@@ -6,4 +6,4 @@ applications:
   path: target/csvkit-1.0.0.RELEASE.jar
   buildpack: java_buildpack
   services:
-  - dev-db-small
+  - csvdb-1.0.0
