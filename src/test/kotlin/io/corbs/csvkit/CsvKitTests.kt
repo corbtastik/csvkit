@@ -53,10 +53,41 @@ class CsvKitTests {
     private val testNumberOfLines = 13
 
     @Test
-    fun testCsvClient(){
+    fun doQueryTest() {
+        doQueryTest(100)
+    }
+
+    fun doQueryTest(calm: Int = 1000) {
+
+        // create 3 lines
+        testCsvClient(3)
+
         var current = System.currentTimeMillis()
         val ending = current + testDuration
-        val numberOfLines = 13
+        while(current < ending) {
+
+            // read them repeat for N milliseconds
+            val response = if(ObjectUtils.isEmpty(testEndpoint)) {
+                client?.getForObject("/csv/names", String::class.java)
+            } else {
+                client?.getForObject("${testEndpoint}/csv/names", String::class.java)
+            }
+
+            LOG.info(response)
+
+            Thread.sleep(calm.toLong()) // calming effect
+            current = System.currentTimeMillis()
+        }
+    }
+
+    @Test
+    fun testCsvClient() {
+        testCsvClient(1, 100)
+    }
+
+    fun testCsvClient(numberOfLines: Int = 1, calm: Int = 100){
+        var current = System.currentTimeMillis()
+        val ending = current + testDuration
         while(current < ending) {
 
             // TODO make more idomatic
@@ -65,7 +96,7 @@ class CsvKitTests {
 
             LOG.info(response)
 
-            Thread.sleep(100) // calming effect
+            Thread.sleep(calm.toLong()) // calming effect
             current = System.currentTimeMillis()
         }
     }
