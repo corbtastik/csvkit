@@ -51,7 +51,7 @@ class CsvKitAPI(@Autowired val csvService: CsvService) {
 
         for(line in csvLines){
             val list = line.asList()
-            csvService.saveMetadata(CsvMetadata(tag = list[0], property = list[1], value = list[2]))
+            csvService.saveMetadata(CsvMetadata(tag = tag, property = list[0], value = list[1]))
         }
 
         return "thank,you,for,${csvLines.size},metadata"
