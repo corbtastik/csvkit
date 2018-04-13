@@ -38,24 +38,7 @@ class CsvService(@Autowired val repo: CsvLineRepository) {
         return lines.size
     }
 
-//    fun findAllLines(tag: String, callback: (List<CsvLine>) -> Unit) {
-//        val buffer = mutableListOf<CsvLine>()
-//        var i = 1
-//
-//        repo.findByTag(tag).forEach{
-//            if(i == 1) {
-//                buffer.add(CsvHeader(it.text))
-//            } else {
-//                buffer.add(CsvLine(it.text))
-//            }
-//            if((i % this.size) == 0) {
-//                callback(buffer)
-//                buffer.clear()
-//            }
-//            i++
-//        }
-//        callback(buffer)
-//    }
+
 
 }
 
